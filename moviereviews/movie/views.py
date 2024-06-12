@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 
 from .forms import ReviewForm
-from .models import Movie
+from .models import Movie, Review
 
 
 def home(request):
@@ -23,9 +23,10 @@ def signup(request):
     email = request.GET.get('email')
     return render(request, 'signup.html', {'email': email})
 
-def detail(request,movie_id):
+def detail(request, movie_id):
     movie = get_object_or_404(Movie, pk=movie_id)
-    return render(request, 'detail.html', {'movie': movie})
+    reviews = Review.objects.filter(movie=movie)
+    return render(request, 'detail.html', {'movie': movie, 'reviews': reviews})
 
 
 def createreview(request, movie_id):
@@ -42,3 +43,17 @@ def createreview(request, movie_id):
             return redirect('detail', newReview.movie.id)
         except ValueError:
             return render(request, 'createreview.html', {'form': ReviewForm(), 'error': 'złe dane'})
+
+
+def updatereview(request, review_id):
+    review = get_object_or_404(Review, pk=review_id, user=request.user)
+    if request.method == 'GET':
+        form = ReviewForm(instance=review)
+        return render(request, 'updatereview.html', {'form': form, 'review': review})
+    else:
+        try:
+            form = ReviewForm(request.POST, instance=review)
+            form.save()
+            return redirect('detail', review.movie.id)
+        except ValueError:
+            return render(request, 'updatereview.html', {'form': form, 'error': 'złe dane', 'review': review})
