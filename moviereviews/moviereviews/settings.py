@@ -138,3 +138,5 @@ MEDIA_URL = '/media/'
 STATICFILES_DIR = [
     BASE_DIR / 'movierevies/static/',
 ]
+
+LOGIN_URL = 'loginaccount'
